@@ -53,7 +53,7 @@ fun <Msg> style(property: String, value: String): Attribute<Msg> =
  * @param children
  * @return
  */
-fun <Msg> node(name: String, attributes: Array<Attribute<Msg>>, children: Array<Html<Msg>>): Html<Msg> {
+fun <Msg> node(name: String, attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> {
     val organizeFacts = { attributes: Array<Attribute<Msg>> ->
         val result = js("{}")
         attributes.forEach {
@@ -171,3 +171,14 @@ private inline fun forIn(value: dynamic, f: (key: dynamic) -> Unit) {
         i++
     }
 }
+
+fun <Msg> onClick(msg: Msg): Attribute<Msg> =
+    on("click") { msg }
+
+
+fun <Msg> div(attributes: Array<Attribute<Msg>> = arrayOf(), vararg children: Html<Msg>): Html<Msg> =
+    node("div", attributes, children)
+
+
+fun <Msg> button(attributes: Array<Attribute<Msg>> = arrayOf(), vararg children: Html<Msg>): Html<Msg> =
+    node("button", attributes, children)
