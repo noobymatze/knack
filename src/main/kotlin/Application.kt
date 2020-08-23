@@ -4,14 +4,19 @@ import org.w3c.dom.Node
 import org.w3c.dom.events.Event
 import org.w3c.dom.events.InputEvent
 
-class Application<Model, Msg>(
+class Application<Model, Msg> internal constructor(
     private val program: Program<Model, Msg>,
     private var currentNode: Node,
     private var model: Model
 ) {
 
+    private val x = div<Unit>(arrayOf(attribute("class", "Test")))
+    private val y = div<Unit>(arrayOf(attribute("class", "Bla")), text("Test"))
+
     private fun handler(msg: Msg) {
         val newModel = program.update(msg, model)
+        val patches = diff(x, y)
+        console.log(patches)
         // If the references are not equal, we need to render again
         if (newModel !== model) {
             window.requestAnimationFrame {

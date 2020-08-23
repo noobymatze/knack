@@ -3,6 +3,14 @@ import org.w3c.dom.Element
 import org.w3c.dom.Node
 import org.w3c.dom.events.Event
 
+private const val PATCH_REDRAW = "PATCH_REDRAW"
+private const val PATCH_REDRAW_TEXT = "PATCH_REDRAW_TEXT"
+private const val PATCH_ATTRS = "PATCH_ATTRS"
+
+private const val ATTRIBUTE_STYLE = "STYLE"
+private const val ATTRIBUTE_EVENTS = "EVENT"
+private const val ATTRIBUTE_ATTR = "ATTR"
+
 /**
  *
  */
@@ -26,7 +34,7 @@ fun <Msg> attribute(
     @Suppress("UNUSED_VARIABLE")
     value: String
 ): Attribute<Msg> =
-    js("{$: 'ATTR', key: key, value: value}")
+    js("{$: '$ATTRIBUTE_ATTR', key: key, value: value}")
 
 /**
  *
@@ -35,7 +43,7 @@ fun <Msg> attribute(
  * @return
  */
 fun <Msg> on(key: String, handler: (Event) -> Msg): Attribute<Msg> =
-    js("{$: 'EVENT', key: key, value: handler}")
+    js("{$: '$ATTRIBUTE_EVENTS', key: key, value: handler}")
 
 /**
  *
@@ -44,7 +52,7 @@ fun <Msg> on(key: String, handler: (Event) -> Msg): Attribute<Msg> =
  * @return
  */
 fun <Msg> style(property: String, value: String): Attribute<Msg> =
-    js("{$: 'STYLE', key: property, value: value}")
+    js("{$: '$ATTRIBUTE_STYLE', key: property, value: value}")
 
 /**
  *
@@ -78,14 +86,17 @@ fun <Msg> node(name: String, attributes: Array<out Attribute<Msg>>, children: Ar
 fun text(value: String): Html<Nothing> =
     js("""{$: 'TEXT', value: value}""")
 
+
 /**
  *
  */
 fun <Msg> render(html: Html<Msg>, send: (Msg) -> Unit): Node {
     val node = html.asDynamic()
     val tag = node["$"]
-    if (tag == "TEXT")
-        return document.createTextNode(node.value)
+    if (tag == "TEXT") {
+        val domNode = document.createTextNode(node.value)
+        return domNode
+    }
 
     val attributes = node.attributes
     val children = node.children
@@ -93,7 +104,8 @@ fun <Msg> render(html: Html<Msg>, send: (Msg) -> Unit): Node {
     val el = document.createElement(node.name)
     applyAttributes<Msg>(el, attributes, send)
     children.forEach { value ->
-        el.appendChild(render<Msg>(value, send))
+        val domNode = render<Msg>(value, send)
+        el.appendChild(domNode)
     }
 
     return el
@@ -178,7 +190,6 @@ fun <Msg> onClick(msg: Msg): Attribute<Msg> =
 fun <Msg> onInput(toMsg: (String) -> Msg): Attribute<Msg> =
     on("input") {
         val value = it.target?.asDynamic()?.value
-        console.log(value)
         if (value != null && value != undefined)
             toMsg(value as String)
         else
@@ -191,3 +202,148 @@ fun <Msg> div(attributes: Array<Attribute<Msg>> = arrayOf(), vararg children: Ht
 
 fun <Msg> button(attributes: Array<Attribute<Msg>> = arrayOf(), vararg children: Html<Msg>): Html<Msg> =
     node("button", attributes, children)
+
+
+fun <Msg> diff(
+    oldVNode: Html<Msg>,
+    newVNode: Html<Msg>,
+): dynamic {
+    val patches = js("[]")
+    diffHelp(oldVNode, newVNode, patches, 0)
+    return patches
+}
+
+private fun diffHelp(
+    oldVNode: dynamic,
+    newVNode: dynamic,
+    patches: dynamic,
+    index: Int
+) {
+    if (oldVNode === newVNode)
+        // Nothing changed, bail
+        return
+
+    val oldTag = oldVNode["$"]
+    val newTag = newVNode["$"]
+
+    if (oldTag != newTag) {
+        // The tags are different, so the structure has changed
+        return pushPatch(patches, PATCH_REDRAW, index, undefined)
+    }
+
+    when (newTag) {
+        "TEXT" ->
+            if (oldVNode.value != newVNode.value) {
+                pushPatch(patches, PATCH_REDRAW_TEXT, index, newVNode.value)
+            }
+
+        "NODE" -> {
+            val diff = diffAttributes(oldVNode.attributes, newVNode.attributes)
+            if (diff != null) {
+                pushPatch(patches, PATCH_ATTRS, index, diff)
+            }
+
+            diffChildren(oldVNode.children, newVNode.children, patches, index)
+        }
+    }
+}
+
+private fun diffAttributes(oldAttrs: dynamic, newAttrs: dynamic, category: String? = null): dynamic {
+    var diff: dynamic = js("undefined")
+    val keys = js("Object").keys(oldAttrs)
+    var i: dynamic = 0
+    while (i < keys.length) {
+        val key = keys[i]
+        console.log(key)
+        if (key == ATTRIBUTE_ATTR || key == ATTRIBUTE_EVENTS || key == ATTRIBUTE_STYLE) {
+            js("diff = diff || {}")
+            diff[key] = diffAttributes(oldAttrs[key], newAttrs[key], key)
+            i++
+            continue
+        }
+
+        if (!(js("key in newAttrs"))) {
+            js("diff = diff || {}")
+            js("diff[key] = undefined")
+            i++
+            continue
+        }
+
+        val oldValue = oldAttrs[key]
+        val newValue = newAttrs[key]
+
+        if (oldValue == newValue) {
+            i++
+            continue
+        }
+
+        js("diff = diff || {}")
+        js("diff[key] = newValue")
+        i++
+    }
+
+    val newKeys = js("Object").keys(newAttrs)
+    var j: dynamic = 0
+    while (j < newAttrs.length) {
+        val curKey = newKeys[j]
+        js("diff = diff || {}")
+        js("diff[curKey] = newAttrs[curKey]")
+        j++
+    }
+
+    return diff
+}
+
+
+private fun diffChildren(
+    oldChildren: dynamic,
+    newChildren: dynamic,
+    patches: dynamic,
+    index: Int
+) {
+    var i = 0
+
+
+
+}
+
+
+private fun pushPatch(patches: dynamic, patchType: String, index: Int, data: dynamic) {
+    val patch = js("{$: patchType, index: index, data: data, domNode: undefined, send: undefined}")
+    patches.push(patch)
+}
+
+
+private fun <Msg> virtualize(node: Node): Html<Msg> {
+    if (node.nodeType == 3.asDynamic()) {
+        return text(node.textContent ?: "")
+    }
+
+    if (node.nodeType != 1.asDynamic()) {
+        return text("")
+    }
+
+    val el = node.asDynamic()
+
+    val attrList = js("[]")
+    val attrs = el.attributes
+    var i: dynamic = 0
+    while (i < attrs.length) {
+        val attr = attrs[i]
+        val name = attr.name
+        val value = attr.value
+        attrList.push(attribute<Msg>(name, value))
+        i++
+    }
+
+    val tag = el.tagName.toLowerCase()
+    val childList = js("[]")
+    val children = el.children
+    var j: dynamic = 0
+    while (j < children.length) {
+        childList.push(children[i])
+        j++
+    }
+
+    return node(tag, attrList, childList)
+}
