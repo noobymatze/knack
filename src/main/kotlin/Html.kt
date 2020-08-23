@@ -175,6 +175,15 @@ private inline fun forIn(value: dynamic, f: (key: dynamic) -> Unit) {
 fun <Msg> onClick(msg: Msg): Attribute<Msg> =
     on("click") { msg }
 
+fun <Msg> onInput(toMsg: (String) -> Msg): Attribute<Msg> =
+    on("input") {
+        val value = it.target?.asDynamic()?.value
+        console.log(value)
+        if (value != null && value != undefined)
+            toMsg(value as String)
+        else
+            throw RuntimeException()
+    }
 
 fun <Msg> div(attributes: Array<Attribute<Msg>> = arrayOf(), vararg children: Html<Msg>): Html<Msg> =
     node("div", attributes, children)
