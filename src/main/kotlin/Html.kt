@@ -349,23 +349,28 @@ private fun <Msg> addDomNodes(patches: dynamic, domNode: Node, send: (Msg) -> Un
 private fun <Msg> addDomNodesHelp(patches: dynamic, domNode: Node, index: Int, send: (Msg) -> Unit): Int {
     val patchLength = patches.length
     var i: dynamic = index
-    while (i < patchLength) {
-        val patch = patches[i]
-        if (patch.index == i) {
-            patch.domNode = domNode
-            patch.send = send
-            i++
+    var patch = patches[index]
+    while (patch.index == index) {
+        patch.domNode = domNode
+        patch.send = send
+        i++
+        console.log(patch)
+        patch = patches[i]
+        if (patch == undefined || i > patchLength) {
+            return i
         }
-        else {
-            val children = domNode.childNodes
-            val childLength = children.length
-            var childIdx = 0
-            while (childIdx < childLength) {
-                val childNode = children.get(childIdx).asDynamic()
-                i = addDomNodesHelp<Msg>(patches, childNode, i, send)
-                childIdx++
-            }
+    }
+
+    val children = domNode.childNodes
+    val childLength = children.length
+    var c = 0
+    while (c < childLength) {
+        val child = children[c].asDynamic()
+        i = addDomNodesHelp<Msg>(patches, child, i, send)
+        if (patches[i] == undefined) {
+            return i
         }
+        c++
     }
 
     return i
@@ -377,6 +382,7 @@ fun <Msg> applyPatches(patches: dynamic, vNode: Html<Msg>, domNode: Node, send: 
     }
 
     addDomNodes<Msg>(patches, domNode, send)
+    console.log(patches)
 
     var i: dynamic = 0
     while (i < patches.length) {

@@ -10,30 +10,20 @@ class Application<Model, Msg> internal constructor(
     private var model: Model
 ) {
 
-    private val x = div<Unit>(
-        arrayOf(attribute("class", "Test")),
-        text("Test"),
-        div(arrayOf(), text("Hallo"))
-    )
-    private val y = div<Unit>(
-        arrayOf(attribute("class", "Bla")),
-        text("Test"),
-        div(arrayOf(), text("Hallo1"))
-    )
+    private var currentVNode: dynamic = null
 
     private fun handler(msg: Msg) {
         val newModel = program.update(msg, model)
-        val patches = diff(x, y)
-        console.log(patches)
         // If the references are not equal, we need to render again
         if (newModel !== model) {
             window.requestAnimationFrame {
                 val newView = program.view(newModel)
-                val newNode = render(newView, ::handler)
+                val patches = diff(currentVNode, newView)
                 cleanUpEventListener(currentNode)
-                currentNode.parentNode?.replaceChild(newNode, currentNode)
+                val newNode = applyPatches(patches, newView, currentNode, ::handler)
                 this.model = newModel
                 this.currentNode = newNode
+                this.currentVNode = newView
                 setupEventListener(currentNode)
             }
         }
@@ -41,6 +31,7 @@ class Application<Model, Msg> internal constructor(
 
     init {
         val view = program.view(model)
+        this.currentVNode = view
         val rootNode = virtualize<Msg>(currentNode)
         val patches = diff(rootNode, view)
         this.currentNode = applyPatches(patches, view, currentNode, ::handler)
