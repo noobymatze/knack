@@ -10,8 +10,16 @@ class Application<Model, Msg> internal constructor(
     private var model: Model
 ) {
 
-    private val x = div<Unit>(arrayOf(attribute("class", "Test")))
-    private val y = div<Unit>(arrayOf(attribute("class", "Bla")), text("Test"))
+    private val x = div<Unit>(
+        arrayOf(attribute("class", "Test")),
+        text("Test"),
+        div(arrayOf(), text("Hallo"))
+    )
+    private val y = div<Unit>(
+        arrayOf(attribute("class", "Bla")),
+        text("Test"),
+        div(arrayOf(), text("Hallo1"))
+    )
 
     private fun handler(msg: Msg) {
         val newModel = program.update(msg, model)
@@ -33,9 +41,9 @@ class Application<Model, Msg> internal constructor(
 
     init {
         val view = program.view(model)
-        val node = render(view, ::handler)
-        currentNode.parentNode?.replaceChild(node, currentNode)
-        this.currentNode = node
+        val rootNode = virtualize<Msg>(currentNode)
+        val patches = diff(rootNode, view)
+        this.currentNode = applyPatches(patches, view, currentNode, ::handler)
         setupEventListener(currentNode)
     }
 

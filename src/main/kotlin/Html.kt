@@ -2,9 +2,14 @@ import kotlinx.browser.document
 import org.w3c.dom.Element
 import org.w3c.dom.Node
 import org.w3c.dom.events.Event
+import org.w3c.dom.get
+import kotlin.math.abs
+import kotlin.math.min
 
 private const val PATCH_REDRAW = "PATCH_REDRAW"
 private const val PATCH_REDRAW_TEXT = "PATCH_REDRAW_TEXT"
+private const val PATCH_REMOVE_FROM = "PATCH_REMOVE_FROM"
+private const val PATCH_ADD = "PATCH_ADD"
 private const val PATCH_ATTRS = "PATCH_ATTRS"
 
 private const val ATTRIBUTE_STYLE = "STYLE"
@@ -218,24 +223,28 @@ private fun diffHelp(
     newVNode: dynamic,
     patches: dynamic,
     index: Int
-) {
+): Int {
     if (oldVNode === newVNode)
         // Nothing changed, bail
-        return
+        return index
 
     val oldTag = oldVNode["$"]
     val newTag = newVNode["$"]
 
     if (oldTag != newTag) {
         // The tags are different, so the structure has changed
-        return pushPatch(patches, PATCH_REDRAW, index, undefined)
+        pushPatch(patches, PATCH_REDRAW, index, undefined)
+        return index
     }
 
     when (newTag) {
-        "TEXT" ->
+        "TEXT" -> {
             if (oldVNode.value != newVNode.value) {
                 pushPatch(patches, PATCH_REDRAW_TEXT, index, newVNode.value)
             }
+
+            return index
+        }
 
         "NODE" -> {
             val diff = diffAttributes(oldVNode.attributes, newVNode.attributes)
@@ -243,10 +252,42 @@ private fun diffHelp(
                 pushPatch(patches, PATCH_ATTRS, index, diff)
             }
 
-            diffChildren(oldVNode.children, newVNode.children, patches, index)
+            return diffChildren(oldVNode.children, newVNode.children, patches, index)
         }
+
+        else ->
+            throw Error("Unknown Tag")
     }
 }
+
+
+private fun diffChildren(
+    oldChildren: dynamic,
+    newChildren: dynamic,
+    patches: dynamic,
+    index: Int
+): Int {
+    var curIdx = index
+    val newLength = newChildren.length
+    val oldLength = oldChildren.length
+
+    if (newLength < oldLength) {
+        pushPatch(patches, PATCH_REMOVE_FROM, index, newLength)
+    }
+    else if (oldLength < newLength) {
+        pushPatch(patches, PATCH_ADD, index, oldLength)
+    }
+
+    var i: dynamic= 0
+    val minLen = if (oldLength < newLength) oldLength else newLength
+    while (i < minLen) {
+        curIdx = diffHelp(oldChildren[i], newChildren[i], patches, ++curIdx)
+        i++
+    }
+
+    return curIdx
+}
+
 
 private fun diffAttributes(oldAttrs: dynamic, newAttrs: dynamic, category: String? = null): dynamic {
     var diff: dynamic = js("undefined")
@@ -254,7 +295,6 @@ private fun diffAttributes(oldAttrs: dynamic, newAttrs: dynamic, category: Strin
     var i: dynamic = 0
     while (i < keys.length) {
         val key = keys[i]
-        console.log(key)
         if (key == ATTRIBUTE_ATTR || key == ATTRIBUTE_EVENTS || key == ATTRIBUTE_STYLE) {
             js("diff = diff || {}")
             diff[key] = diffAttributes(oldAttrs[key], newAttrs[key], key)
@@ -262,6 +302,7 @@ private fun diffAttributes(oldAttrs: dynamic, newAttrs: dynamic, category: Strin
             continue
         }
 
+        js("newAttrs = newAttrs || {}")
         if (!(js("key in newAttrs"))) {
             js("diff = diff || {}")
             js("diff[key] = undefined")
@@ -295,26 +336,99 @@ private fun diffAttributes(oldAttrs: dynamic, newAttrs: dynamic, category: Strin
 }
 
 
-private fun diffChildren(
-    oldChildren: dynamic,
-    newChildren: dynamic,
-    patches: dynamic,
-    index: Int
-) {
-    var i = 0
-
-
-
-}
-
-
 private fun pushPatch(patches: dynamic, patchType: String, index: Int, data: dynamic) {
     val patch = js("{$: patchType, index: index, data: data, domNode: undefined, send: undefined}")
     patches.push(patch)
 }
 
 
-private fun <Msg> virtualize(node: Node): Html<Msg> {
+private fun <Msg> addDomNodes(patches: dynamic, domNode: Node, send: (Msg) -> Unit) {
+    addDomNodesHelp(patches, domNode, 0, send)
+}
+
+private fun <Msg> addDomNodesHelp(patches: dynamic, domNode: Node, index: Int, send: (Msg) -> Unit): Int {
+    val patchLength = patches.length
+    var i: dynamic = index
+    while (i < patchLength) {
+        val patch = patches[i]
+        if (patch.index == i) {
+            patch.domNode = domNode
+            patch.send = send
+            i++
+        }
+        else {
+            val children = domNode.childNodes
+            val childLength = children.length
+            var childIdx = 0
+            while (childIdx < childLength) {
+                val childNode = children.get(childIdx).asDynamic()
+                i = addDomNodesHelp<Msg>(patches, childNode, i, send)
+                childIdx++
+            }
+        }
+    }
+
+    return i
+}
+
+fun <Msg> applyPatches(patches: dynamic, vNode: Html<Msg>, domNode: Node, send: (Msg) -> Unit): Node {
+    if (patches.length == 0) {
+        return domNode
+    }
+
+    addDomNodes<Msg>(patches, domNode, send)
+
+    var i: dynamic = 0
+    while (i < patches.length) {
+        applyPatch(patches[i], vNode)
+        i++
+    }
+
+    return domNode
+}
+
+private fun <Msg> applyPatch(patch: dynamic, vNode: Html<Msg>): Node {
+    val patchType = patch["$"]
+    when (patchType) {
+        PATCH_REDRAW -> {
+            val domNode = patch.domNode
+            val el = render(vNode, patch.send)
+            domNode.parentNode.replaceChild(el, domNode)
+            return domNode
+        }
+
+        PATCH_REDRAW_TEXT -> {
+            val domNode = patch.domNode
+            domNode.replaceData(0, domNode.length, patch.data)
+            return domNode
+        }
+
+        PATCH_ATTRS -> {
+            val domNode = patch.domNode
+            applyAttributes<Msg>(domNode, patch.data, patch.send)
+            return domNode
+        }
+
+        PATCH_ADD -> {
+            val n = vNode.asDynamic()
+            val children = n.children
+            val domNode = patch.domNode
+            val from = patch.data
+            var i: dynamic = from
+            while (i < children.length) {
+                domNode.appendChild(render<Msg>(children[i], patch.send))
+                i++
+            }
+
+            return domNode
+        }
+    }
+
+    throw Error("Unknown patch msg")
+}
+
+
+fun <Msg> virtualize(node: Node): Html<Msg> {
     if (node.nodeType == 3.asDynamic()) {
         return text(node.textContent ?: "")
     }
