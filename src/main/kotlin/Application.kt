@@ -44,10 +44,8 @@ class Application<Model, Msg> internal constructor(
     }
 
     fun handleClick(event: Event) {
-        console.log(event)
 
         val t = event.target?.asDynamic()
-        console.log(t)
         if (t.eventFs["click"] != undefined) {
 
             t.eventFs["click"](event)

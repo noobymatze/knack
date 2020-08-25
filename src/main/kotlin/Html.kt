@@ -3,8 +3,6 @@ import org.w3c.dom.Element
 import org.w3c.dom.Node
 import org.w3c.dom.events.Event
 import org.w3c.dom.get
-import kotlin.math.abs
-import kotlin.math.min
 
 private const val PATCH_REDRAW = "PATCH_REDRAW"
 private const val PATCH_REDRAW_TEXT = "PATCH_REDRAW_TEXT"
@@ -297,7 +295,10 @@ private fun diffAttributes(oldAttrs: dynamic, newAttrs: dynamic, category: Strin
         val key = keys[i]
         if (key == ATTRIBUTE_ATTR || key == ATTRIBUTE_EVENTS || key == ATTRIBUTE_STYLE) {
             js("diff = diff || {}")
-            diff[key] = diffAttributes(oldAttrs[key], newAttrs[key], key)
+            val x = diffAttributes(oldAttrs[key], newAttrs[key], key)
+            if (x != undefined) {
+                diff[key] = x
+            }
             i++
             continue
         }
@@ -343,21 +344,47 @@ private fun pushPatch(patches: dynamic, patchType: String, index: Int, data: dyn
 
 
 private fun <Msg> addDomNodes(patches: dynamic, domNode: Node, send: (Msg) -> Unit) {
-    addDomNodesHelp(patches, domNode, 0, send)
-}
-
-private fun <Msg> addDomNodesHelp(patches: dynamic, domNode: Node, index: Int, send: (Msg) -> Unit): Int {
-    val patchLength = patches.length
-    var i: dynamic = index
-    var patch = patches[index]
-    while (patch.index == index) {
-        patch.domNode = domNode
+    val result = depthFirst(emptyList(), domNode).toTypedArray()
+    var i: dynamic = 0
+    while (i < patches.length) {
+        val patch = patches[i]
+        patch.domNode = result[patch.index]
         patch.send = send
         i++
-        console.log(patch)
-        patch = patches[i]
-        if (patch == undefined || i > patchLength) {
-            return i
+    }
+}
+
+private fun depthFirst(forest: List<Node>, next: Node): List<Node> {
+    val childNodes = next.childNodes
+    if (childNodes.length == 0) {
+        return forest + listOf(next)
+    }
+
+    var i = 0
+    val result = mutableListOf(next)
+    while (i < childNodes.length) {
+        val childNode = childNodes[i]!!
+        result.addAll(depthFirst(forest, childNode))
+        i++
+    }
+
+    return result
+}
+
+private fun <Msg> addDomNodesHelp(patches: dynamic, domNode: Node, patchIdx: Int, domIdx: Int, send: (Msg) -> Unit): Int {
+    val patchLength = patches.length
+    var currentPatchIdx: dynamic = patchIdx
+    var currentDomIdx: dynamic = domIdx
+    var patch = patches[currentPatchIdx]
+    console.log(patch, currentPatchIdx)
+    while (patch.index == currentDomIdx) {
+        patch.domNode = domNode
+        patch.send = send
+        currentPatchIdx++
+        console.log(patch, currentPatchIdx)
+        patch = patches[currentPatchIdx]
+        if (patch == undefined || currentPatchIdx > patchLength) {
+            return currentPatchIdx
         }
     }
 
@@ -366,14 +393,14 @@ private fun <Msg> addDomNodesHelp(patches: dynamic, domNode: Node, index: Int, s
     var c = 0
     while (c < childLength) {
         val child = children[c].asDynamic()
-        i = addDomNodesHelp<Msg>(patches, child, i, send)
-        if (patches[i] == undefined) {
-            return i
+        currentPatchIdx = addDomNodesHelp<Msg>(patches, child, currentPatchIdx, ++currentDomIdx, send)
+        if (patches[currentPatchIdx] == undefined) {
+            return currentPatchIdx
         }
         c++
     }
 
-    return i
+    return currentPatchIdx
 }
 
 fun <Msg> applyPatches(patches: dynamic, vNode: Html<Msg>, domNode: Node, send: (Msg) -> Unit): Node {
@@ -382,7 +409,6 @@ fun <Msg> applyPatches(patches: dynamic, vNode: Html<Msg>, domNode: Node, send: 
     }
 
     addDomNodes<Msg>(patches, domNode, send)
-    console.log(patches)
 
     var i: dynamic = 0
     while (i < patches.length) {
