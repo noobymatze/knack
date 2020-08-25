@@ -19,12 +19,10 @@ class Application<Model, Msg> internal constructor(
             window.requestAnimationFrame {
                 val newView = program.view(newModel)
                 val patches = diff(currentVNode, newView)
-                cleanUpEventListener(currentNode)
                 val newNode = applyPatches(patches, newView, currentNode, ::handler)
                 this.model = newModel
                 this.currentNode = newNode
                 this.currentVNode = newView
-                setupEventListener(currentNode)
             }
         }
     }
@@ -35,7 +33,7 @@ class Application<Model, Msg> internal constructor(
         val rootNode = virtualize<Msg>(currentNode)
         val patches = diff(rootNode, view)
         this.currentNode = applyPatches(patches, view, currentNode, ::handler)
-        setupEventListener(currentNode)
+        setupEventListener(document)
     }
 
     fun cleanUpEventListener(rootNode: Node) {

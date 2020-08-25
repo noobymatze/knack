@@ -132,15 +132,7 @@ private fun <Msg> applyAttributes(el: Element, attributes: dynamic, send: (Msg) 
 
 private fun <Msg> applyEvents(domNode: Element, events: dynamic, sendToApp: (Msg) -> Unit) {
     val node = domNode.asDynamic()
-    val allCallbacks = when (node.eventFs) {
-        undefined -> {
-            node.eventFs = js("{}")
-            node.eventFs
-        }
-
-        else ->
-            node.eventFs
-    }
+    val allCallbacks = js("(node.eventFs = node.eventFs || {})")
 
     forIn(events) { key ->
         val newHandler = events[key]
@@ -344,63 +336,46 @@ private fun pushPatch(patches: dynamic, patchType: String, index: Int, data: dyn
 
 
 private fun <Msg> addDomNodes(patches: dynamic, domNode: Node, send: (Msg) -> Unit) {
-    val result = depthFirst(emptyList(), domNode).toTypedArray()
-    var i: dynamic = 0
-    while (i < patches.length) {
-        val patch = patches[i]
-        patch.domNode = result[patch.index]
-        patch.send = send
-        i++
-    }
+    val state = js("{index: 0, domIdx: 0}")
+    collectDomNodes<Msg>(patches, domNode, state, send)
 }
 
-private fun depthFirst(forest: List<Node>, next: Node): List<Node> {
-    val childNodes = next.childNodes
-    if (childNodes.length == 0) {
-        return forest + listOf(next)
-    }
-
-    var i = 0
-    val result = mutableListOf(next)
-    while (i < childNodes.length) {
-        val childNode = childNodes[i]!!
-        result.addAll(depthFirst(forest, childNode))
-        i++
-    }
-
-    return result
-}
-
-private fun <Msg> addDomNodesHelp(patches: dynamic, domNode: Node, patchIdx: Int, domIdx: Int, send: (Msg) -> Unit): Int {
+private fun <Msg> collectDomNodes(patches: dynamic, domNode: Node, state: dynamic, send: (Msg) -> Unit) {
+    var patchIdx: dynamic = state.index
     val patchLength = patches.length
-    var currentPatchIdx: dynamic = patchIdx
-    var currentDomIdx: dynamic = domIdx
-    var patch = patches[currentPatchIdx]
-    console.log(patch, currentPatchIdx)
-    while (patch.index == currentDomIdx) {
+    if (patchIdx >= patchLength)
+        return
+
+    // COLLECT ALL PATCHES FOR THIS NODE
+    val domIdx = state.domIdx
+    var patch = patches[patchIdx]
+    while (patch.index == domIdx) {
         patch.domNode = domNode
         patch.send = send
-        currentPatchIdx++
-        console.log(patch, currentPatchIdx)
-        patch = patches[currentPatchIdx]
-        if (patch == undefined || currentPatchIdx > patchLength) {
-            return currentPatchIdx
+        patchIdx++
+        if (patchIdx >= patchLength) {
+            return
         }
+
+        patch = patches[patchIdx]
     }
 
-    val children = domNode.childNodes
-    val childLength = children.length
-    var c = 0
-    while (c < childLength) {
-        val child = children[c].asDynamic()
-        currentPatchIdx = addDomNodesHelp<Msg>(patches, child, currentPatchIdx, ++currentDomIdx, send)
-        if (patches[currentPatchIdx] == undefined) {
-            return currentPatchIdx
+    state.index = patchIdx
+
+    var childIdx = 0
+    val childNodes = domNode.childNodes
+    val childLength = childNodes.length
+    while (childIdx < childLength) {
+        val child = childNodes[childIdx].asDynamic()
+        state.domIdx = state.domIdx + 1
+        collectDomNodes<Msg>(patches, child, state, send)
+        if (patchIdx >= patchLength) {
+            return patchIdx
         }
-        c++
+        childIdx++
     }
 
-    return currentPatchIdx
+    return patchIdx
 }
 
 fun <Msg> applyPatches(patches: dynamic, vNode: Html<Msg>, domNode: Node, send: (Msg) -> Unit): Node {
