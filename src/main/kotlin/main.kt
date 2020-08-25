@@ -25,7 +25,7 @@ fun view(i: Model): Html<Msg> = div(
         text("Klick me"),
     ),
     node("input", arrayOf(onInput(Msg::SetName), attribute("value", i.name)), arrayOf()),
-    text(i.name)
+    text(i.name),
 )
 
 
