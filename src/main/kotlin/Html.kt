@@ -7,7 +7,7 @@ import org.w3c.dom.get
 
 private const val PATCH_REDRAW = "PATCH_REDRAW"
 private const val PATCH_REDRAW_TEXT = "PATCH_REDRAW_TEXT"
-private const val PATCH_REMOVE_FROM = "PATCH_REMOVE_FROM"
+private const val PATCH_REMOVE_LAST = "PATCH_REMOVE_LAST"
 private const val PATCH_ADD = "PATCH_ADD"
 private const val PATCH_ATTRS = "PATCH_ATTRS"
 
@@ -271,10 +271,10 @@ private fun diffChildren(
     val oldLength = oldChildren.length
 
     if (newLength < oldLength) {
-        pushPatch(patches, PATCH_REMOVE_FROM, index, newLength)
+        pushPatch(patches, PATCH_REMOVE_LAST, index, oldLength - newLength)
     }
     else if (oldLength < newLength) {
-        pushPatch(patches, PATCH_ADD, index, oldLength)
+        pushPatch(patches, PATCH_ADD, index, js("{children: newChildren, oldLength: oldLength}"))
     }
 
     var i: dynamic= 0
@@ -426,14 +426,25 @@ private fun <Msg> applyPatch(patch: dynamic, vNode: Html<Msg>): Node {
         }
 
         PATCH_ADD -> {
-            val n = vNode.asDynamic()
-            val children = n.children
+            val data = patch.data
             val domNode = patch.domNode
-            val from = patch.data
-            var i: dynamic = from
+            val children = data.children
+            var i = data.oldLength
             while (i < children.length) {
                 domNode.appendChild(render<Msg>(children[i], patch.send))
                 i++
+            }
+
+            return domNode
+        }
+
+        PATCH_REMOVE_LAST -> {
+            val domNode: Node = patch.domNode
+            var diff = patch.data
+            while (diff >= 0) {
+                val childNodes = domNode.childNodes
+                domNode.removeChild(childNodes[childNodes.length - 1].asDynamic())
+                diff--
             }
 
             return domNode
