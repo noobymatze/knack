@@ -2,6 +2,7 @@ import kotlinx.browser.document
 import org.w3c.dom.Element
 import org.w3c.dom.Node
 import org.w3c.dom.events.Event
+import org.w3c.dom.events.EventListener
 import org.w3c.dom.get
 
 private const val PATCH_REDRAW = "PATCH_REDRAW"
@@ -137,6 +138,8 @@ private fun <Msg> applyEvents(domNode: Element, events: dynamic, sendToApp: (Msg
     forIn(events) { key ->
         val newHandler = events[key]
         if (!newHandler) {
+            val oldHandler: EventListener = allCallbacks[key]
+            domNode.removeEventListener(key, oldHandler)
             allCallbacks[key] = undefined
         }
         else {
@@ -144,7 +147,13 @@ private fun <Msg> applyEvents(domNode: Element, events: dynamic, sendToApp: (Msg
                 sendToApp(newHandler(event))
             }
 
+            val oldHandler: EventListener = allCallbacks[key]
+            if (oldHandler != undefined) {
+                domNode.removeEventListener(key, oldHandler)
+            }
+
             allCallbacks[key] = callback
+            domNode.addEventListener(key, callback)
         }
     }
 }
