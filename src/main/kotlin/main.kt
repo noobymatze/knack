@@ -26,6 +26,10 @@ fun view(i: Model): Html<Msg> = div(
     ),
     node("input", arrayOf(onInput(Msg::SetName), attribute("value", i.name)), arrayOf()),
     text(i.name),
+    if (i.name == "Test")
+        div(arrayOf(style("color", "red")), text("This is a Test"))
+    else
+        text("What")
 )
 
 

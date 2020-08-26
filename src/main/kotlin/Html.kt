@@ -232,7 +232,7 @@ private fun diffHelp(
 
     if (oldTag != newTag) {
         // The tags are different, so the structure has changed
-        pushPatch(patches, PATCH_REDRAW, index, undefined)
+        pushPatch(patches, PATCH_REDRAW, index, newVNode)
         return index
     }
 
@@ -255,7 +255,7 @@ private fun diffHelp(
         }
 
         else ->
-            throw Error("Unknown Tag")
+            throw Error("Unreachable")
     }
 }
 
@@ -408,9 +408,9 @@ private fun <Msg> applyPatch(patch: dynamic, vNode: Html<Msg>): Node {
     when (patchType) {
         PATCH_REDRAW -> {
             val domNode = patch.domNode
-            val el = render(vNode, patch.send)
+            val el = render<Msg>(patch.data, patch.send)
             domNode.parentNode.replaceChild(el, domNode)
-            return domNode
+            return el
         }
 
         PATCH_REDRAW_TEXT -> {
