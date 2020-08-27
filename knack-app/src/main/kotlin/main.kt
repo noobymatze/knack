@@ -10,7 +10,8 @@ data class Model(
 )
 
 
-fun init(): Model = Model(0, "")
+fun init(): Pair<Model, Cmd<Msg>> =
+    Model(0, "") to Cmd.none
 
 
 
@@ -21,10 +22,10 @@ fun view(i: Model): VNode<Msg> = div(
     arrayOf(),
     text("${i.count}"),
     button(arrayOf(onClick(Msg.Inc)),
-        node("a", arrayOf(onClick(Msg.Dec)), arrayOf(text("Bla"))),
+        a(arrayOf(onClick(Msg.Dec)), text("Bla")),
         text("Klick me"),
     ),
-    node("input", arrayOf(onInput(Msg::SetName), attribute("value", i.name)), arrayOf()),
+    input(onInput(Msg::SetName), attribute("value", i.name)),
     text(i.name),
     if (i.name == "Test")
         div(arrayOf(style("color", "red")), text("This is a Test"))
@@ -44,15 +45,15 @@ sealed class Msg {
 }
 
 
-fun update(msg: Msg, model: Model): Model = when (msg) {
+fun update(msg: Msg, model: Model): Pair<Model, Cmd<Msg>> = when (msg) {
     Msg.Inc ->
-        model.copy(count = model.count + 1)
+        model.copy(count = model.count + 1) to Cmd.none
 
     Msg.Dec ->
-        model.copy(count = model.count - 1)
+        model.copy(count = model.count - 1) to Cmd.none
 
     is Msg.SetName ->
-        model.copy(name = msg.name)
+        model.copy(name = msg.name) to Cmd.none
 }
 
 

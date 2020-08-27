@@ -61,31 +61,6 @@ fun <Msg> style(property: String, value: String): Attribute<Msg> =
  * @param name
  * @param attributes
  * @param children
- */
-fun <Msg> node(name: String, attributes: List<Attribute<Msg>>, children: List<VNode<Msg>>): VNode<Msg> {
-    // This code is duplicated purely for performance reasons
-    val organizeFacts0 = { attrs: List<Attribute<Msg>> ->
-        val result = js("{}")
-        attrs.forEach {
-            val attr = it.asDynamic()
-            val tag = attr["$"]
-            if (result[tag] == undefined)
-                result[tag] = js("{}")
-            val r = result[tag]
-            r[attr.key] = attr.value
-        }
-
-        result
-    }
-
-    return js("""{$: 'NODE', name: name, attributes: organizeFacts(attributes), children: children}""")
-}
-
-/**
- *
- * @param name
- * @param attributes
- * @param children
  * @return
  */
 fun <Msg> node(name: String, attributes: Array<out Attribute<Msg>>, children: Array<out VNode<Msg>>): VNode<Msg> {
