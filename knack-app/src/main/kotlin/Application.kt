@@ -15,10 +15,8 @@ class Application<Model, Msg> internal constructor(
         if (newModel !== model) {
             window.requestAnimationFrame {
                 val newView = program.view(newModel)
-                val patches = diff(currentVNode, newView)
-                val newNode = applyPatches(patches, newView, currentNode, ::handler)
+                this.currentNode = render(currentNode, currentVNode, newView, ::handler)
                 this.model = newModel
-                this.currentNode = newNode
                 this.currentVNode = newView
             }
         }
@@ -27,9 +25,7 @@ class Application<Model, Msg> internal constructor(
     init {
         val view = program.view(model)
         this.currentVNode = view
-        val rootNode = virtualize<Msg>(currentNode)
-        val patches = diff(rootNode, view)
-        this.currentNode = applyPatches(patches, view, currentNode, ::handler)
+        this.currentNode = render(currentNode, view, null, ::handler)
     }
 
 }

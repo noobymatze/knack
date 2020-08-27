@@ -17,7 +17,7 @@ fun init(): Model = Model(0, "")
 // VIEW
 
 
-fun view(i: Model): Html<Msg> = div(
+fun view(i: Model): VNode<Msg> = div(
     arrayOf(),
     text("${i.count}"),
     button(arrayOf(onClick(Msg.Inc)),

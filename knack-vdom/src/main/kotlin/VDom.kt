@@ -1,15 +1,11 @@
+@file:Suppress("UNUSED_PARAMETER", "UNUSED_VARIABLE", "UnsafeCastFromDynamic", "unused")
+
 import kotlinx.browser.document
 import org.w3c.dom.Element
 import org.w3c.dom.Node
 import org.w3c.dom.events.Event
 import org.w3c.dom.events.EventListener
 import org.w3c.dom.get
-
-private const val PATCH_REDRAW = "PATCH_REDRAW"
-private const val PATCH_REDRAW_TEXT = "PATCH_REDRAW_TEXT"
-private const val PATCH_REMOVE_LAST = "PATCH_REMOVE_LAST"
-private const val PATCH_ADD = "PATCH_ADD"
-private const val PATCH_ATTRS = "PATCH_ATTRS"
 
 private const val ATTRIBUTE_STYLE = "STYLE"
 private const val ATTRIBUTE_EVENTS = "EVENT"
@@ -23,7 +19,7 @@ class Attribute<out Msg> private constructor()
 /**
  *
  */
-class Html<out Msg> private constructor()
+class VNode<out Msg> private constructor()
 
 
 /**
@@ -33,9 +29,7 @@ class Html<out Msg> private constructor()
  * @return
  */
 fun <Msg> attribute(
-    @Suppress("UNUSED_VARIABLE")
     key: String,
-    @Suppress("UNUSED_VARIABLE")
     value: String
 ): Attribute<Msg> =
     js("{$: '$ATTRIBUTE_ATTR', key: key, value: value}")
@@ -46,7 +40,10 @@ fun <Msg> attribute(
  * @param handler
  * @return
  */
-fun <Msg> on(key: String, handler: (Event) -> Msg): Attribute<Msg> =
+fun <Msg> on(
+    key: String,
+    handler: (Event) -> Msg
+): Attribute<Msg> =
     js("{$: '$ATTRIBUTE_EVENTS', key: key, value: handler}")
 
 /**
@@ -58,6 +55,32 @@ fun <Msg> on(key: String, handler: (Event) -> Msg): Attribute<Msg> =
 fun <Msg> style(property: String, value: String): Attribute<Msg> =
     js("{$: '$ATTRIBUTE_STYLE', key: property, value: value}")
 
+
+/**
+ *
+ * @param name
+ * @param attributes
+ * @param children
+ */
+fun <Msg> node(name: String, attributes: List<Attribute<Msg>>, children: List<VNode<Msg>>): VNode<Msg> {
+    // This code is duplicated purely for performance reasons
+    val organizeFacts0 = { attrs: List<Attribute<Msg>> ->
+        val result = js("{}")
+        attrs.forEach {
+            val attr = it.asDynamic()
+            val tag = attr["$"]
+            if (result[tag] == undefined)
+                result[tag] = js("{}")
+            val r = result[tag]
+            r[attr.key] = attr.value
+        }
+
+        result
+    }
+
+    return js("""{$: 'NODE', name: name, attributes: organizeFacts(attributes), children: children}""")
+}
+
 /**
  *
  * @param name
@@ -65,10 +88,10 @@ fun <Msg> style(property: String, value: String): Attribute<Msg> =
  * @param children
  * @return
  */
-fun <Msg> node(name: String, attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> {
-    val organizeFacts = { attributes: Array<Attribute<Msg>> ->
+fun <Msg> node(name: String, attributes: Array<out Attribute<Msg>>, children: Array<out VNode<Msg>>): VNode<Msg> {
+    val organizeFacts = { attrs: Array<Attribute<Msg>> ->
         val result = js("{}")
-        attributes.forEach {
+        attrs.forEach {
             val attr = it.asDynamic()
             val tag = attr["$"]
             if (result[tag] == undefined)
@@ -87,28 +110,46 @@ fun <Msg> node(name: String, attributes: Array<out Attribute<Msg>>, children: Ar
  * @param value
  * @return
  */
-fun text(value: String): Html<Nothing> =
+fun text(value: String): VNode<Nothing> =
     js("""{$: 'TEXT', value: value}""")
 
 
 /**
  *
+ * @param rootDomNode
+ * @param newVNode
+ * @param oldVNode
+ * @param send
  */
-fun <Msg> render(html: Html<Msg>, send: (Msg) -> Unit): Node {
+fun <Msg> render(
+    rootDomNode: Node,
+    newVNode: VNode<Msg>,
+    oldVNode: VNode<Msg>? = null,
+    send: (Msg) -> Unit
+): Node {
+    val old = oldVNode ?: virtualize(rootDomNode)
+    val patches = diff(old, newVNode)
+    return applyPatches(patches, newVNode, rootDomNode, send)
+}
+
+
+// RENDER
+
+
+private fun <Msg> render(html: VNode<Msg>, send: (Msg) -> Unit): Node {
     val node = html.asDynamic()
     val tag = node["$"]
     if (tag == "TEXT") {
-        val domNode = document.createTextNode(node.value)
-        return domNode
+        return document.createTextNode(node.value)
     }
 
     val attributes = node.attributes
     val children = node.children
 
     val el = document.createElement(node.name)
-    applyAttributes<Msg>(el, attributes, send)
+    applyAttributes(el, attributes, send)
     children.forEach { value ->
-        val domNode = render<Msg>(value, send)
+        val domNode = render(value, send)
         el.appendChild(domNode)
     }
 
@@ -126,7 +167,7 @@ private fun <Msg> applyAttributes(el: Element, attributes: dynamic, send: (Msg) 
                 applyAttrs(el, value)
 
             "EVENT" ->
-                applyEvents<Msg>(el, value, send)
+                applyEvents(el, value, send)
         }
     }
 }
@@ -188,29 +229,21 @@ private inline fun forIn(value: dynamic, f: (key: dynamic) -> Unit) {
     }
 }
 
-fun <Msg> onClick(msg: Msg): Attribute<Msg> =
-    on("click") { msg }
-
-fun <Msg> onInput(toMsg: (String) -> Msg): Attribute<Msg> =
-    on("input") {
-        val value = it.target?.asDynamic()?.value
-        if (value != null && value != undefined)
-            toMsg(value as String)
-        else
-            throw RuntimeException()
-    }
-
-fun <Msg> div(attributes: Array<Attribute<Msg>> = arrayOf(), vararg children: Html<Msg>): Html<Msg> =
-    node("div", attributes, children)
 
 
-fun <Msg> button(attributes: Array<Attribute<Msg>> = arrayOf(), vararg children: Html<Msg>): Html<Msg> =
-    node("button", attributes, children)
+// DIFFING & PATCHING
 
 
-fun <Msg> diff(
-    oldVNode: Html<Msg>,
-    newVNode: Html<Msg>,
+private const val PATCH_REDRAW = "PATCH_REDRAW"
+private const val PATCH_REDRAW_TEXT = "PATCH_REDRAW_TEXT"
+private const val PATCH_REMOVE_LAST = "PATCH_REMOVE_LAST"
+private const val PATCH_ADD = "PATCH_ADD"
+private const val PATCH_ATTRS = "PATCH_ATTRS"
+
+
+private fun <Msg> diff(
+    oldVNode: VNode<Msg>,
+    newVNode: VNode<Msg>,
 ): dynamic {
     val patches = js("[]")
     diffHelp(oldVNode, newVNode, patches, 0)
@@ -289,7 +322,7 @@ private fun diffChildren(
 
 
 private fun diffAttributes(oldAttrs: dynamic, newAttrs: dynamic, category: String? = null): dynamic {
-    var diff: dynamic = js("undefined")
+    @Suppress("CanBeVal") var diff: dynamic = js("undefined")
     val keys = js("Object").keys(oldAttrs)
     var i: dynamic = 0
     while (i < keys.length) {
@@ -346,7 +379,7 @@ private fun pushPatch(patches: dynamic, patchType: String, index: Int, data: dyn
 
 private fun <Msg> addDomNodes(patches: dynamic, domNode: Node, send: (Msg) -> Unit) {
     val state = js("{index: 0, domIdx: 0}")
-    collectDomNodes<Msg>(patches, domNode, state, send)
+    collectDomNodes(patches, domNode, state, send)
 }
 
 private fun <Msg> collectDomNodes(patches: dynamic, domNode: Node, state: dynamic, send: (Msg) -> Unit) {
@@ -377,7 +410,7 @@ private fun <Msg> collectDomNodes(patches: dynamic, domNode: Node, state: dynami
     while (childIdx < childLength) {
         val child = childNodes[childIdx].asDynamic()
         state.domIdx = state.domIdx + 1
-        collectDomNodes<Msg>(patches, child, state, send)
+        collectDomNodes(patches, child, state, send)
         if (patchIdx >= patchLength) {
             return patchIdx
         }
@@ -387,12 +420,21 @@ private fun <Msg> collectDomNodes(patches: dynamic, domNode: Node, state: dynami
     return patchIdx
 }
 
-fun <Msg> applyPatches(patches: dynamic, vNode: Html<Msg>, domNode: Node, send: (Msg) -> Unit): Node {
+
+
+// PATCHING
+
+
+/**
+ *
+ * @param patches
+ */
+private fun <Msg> applyPatches(patches: dynamic, vNode: VNode<Msg>, domNode: Node, send: (Msg) -> Unit): Node {
     if (patches.length == 0) {
         return domNode
     }
 
-    addDomNodes<Msg>(patches, domNode, send)
+    addDomNodes(patches, domNode, send)
 
     var i: dynamic = 0
     while (i < patches.length) {
@@ -403,9 +445,8 @@ fun <Msg> applyPatches(patches: dynamic, vNode: Html<Msg>, domNode: Node, send: 
     return domNode
 }
 
-private fun <Msg> applyPatch(patch: dynamic, vNode: Html<Msg>): Node {
-    val patchType = patch["$"]
-    when (patchType) {
+private fun <Msg> applyPatch(patch: dynamic, vNode: VNode<Msg>): Node {
+    when (val patchType = patch["$"]) {
         PATCH_REDRAW -> {
             val domNode = patch.domNode
             val el = render<Msg>(patch.data, patch.send)
@@ -449,13 +490,13 @@ private fun <Msg> applyPatch(patch: dynamic, vNode: Html<Msg>): Node {
 
             return domNode
         }
+        else ->
+            throw Error("Unknown patch $patch")
     }
-
-    throw Error("Unknown patch msg")
 }
 
 
-fun <Msg> virtualize(node: Node): Html<Msg> {
+private fun <Msg> virtualize(node: Node): VNode<Msg> {
     if (node.nodeType == 3.asDynamic()) {
         return text(node.textContent ?: "")
     }
@@ -486,5 +527,5 @@ fun <Msg> virtualize(node: Node): Html<Msg> {
         j++
     }
 
-    return node(tag, attrList, childList)
+    return node(tag, attrList, childList as Array<out VNode<Msg>>)
 }
