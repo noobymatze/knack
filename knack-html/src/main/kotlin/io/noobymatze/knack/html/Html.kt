@@ -1,17 +1,12 @@
+package io.noobymatze.knack.html
+
+import io.noobymatze.knack.vdom.Attribute
+import io.noobymatze.knack.vdom.VNode
+import io.noobymatze.knack.vdom.node
+import io.noobymatze.knack.vdom.on
+
+
 typealias Html<Msg> = VNode<Msg>
-
-fun <Msg> onClick(msg: Msg): Attribute<Msg> =
-    on("click") { msg }
-
-fun <Msg> onInput(toMsg: (String) -> Msg): Attribute<Msg> =
-    on("input") {
-        val value = it.target?.asDynamic()?.value
-        if (value != null && value != undefined)
-            toMsg(value as String)
-        else
-            throw RuntimeException()
-    }
-
 
 fun <Msg> text(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
     node("text", attributes, children)

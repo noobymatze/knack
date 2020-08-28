@@ -1,3 +1,7 @@
+package io.noobymatze.knack.app
+
+import Msg
+
 sealed class Cmd<out Msg> {
 
     internal object None: Cmd<Nothing>()

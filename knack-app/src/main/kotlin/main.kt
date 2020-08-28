@@ -1,3 +1,11 @@
+import io.noobymatze.knack.app.Cmd
+import io.noobymatze.knack.app.Program
+import io.noobymatze.knack.html.*
+import io.noobymatze.knack.html.Events.onClick
+import io.noobymatze.knack.html.Events.onInput
+import io.noobymatze.knack.vdom.attribute
+import io.noobymatze.knack.vdom.style
+import io.noobymatze.knack.vdom.text
 import kotlinx.browser.document
 
 
@@ -18,7 +26,7 @@ fun init(): Pair<Model, Cmd<Msg>> =
 // VIEW
 
 
-fun view(i: Model): VNode<Msg> = div(
+fun view(i: Model): Html<Msg> = div(
     arrayOf(),
     text("${i.count}"),
     button(arrayOf(onClick(Msg.Inc)),
