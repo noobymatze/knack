@@ -9,22 +9,10 @@ class Application<Model, Msg> internal constructor(
     private var currentNode: Node
 ) {
 
+    private var alreadyScheduled = false
     private var messages: MutableList<Msg> = mutableListOf()
     private var model: Model? = null
     private var currentVNode: dynamic = null
-
-    private fun handler(msg: Msg) {
-        val (newModel, cmd) = program.update(msg, model.asDynamic())
-        // If the references are not equal, we need to io.noobymatze.knack.render again
-        if (newModel !== model) {
-            window.requestAnimationFrame {
-                val newView = program.view(newModel)
-                this.currentNode = render(currentNode, currentVNode, newView, ::handler)
-                this.model = newModel
-                this.currentVNode = newView
-            }
-        }
-    }
 
     fun send(msg: Msg) {
         messages.add(msg)
@@ -32,20 +20,41 @@ class Application<Model, Msg> internal constructor(
     }
 
     private fun updateIfNeeded() {
-        if (!messages.isEmpty()) {
-            window.requestAnimationFrame {  }
+        if (!alreadyScheduled) {
+            window.requestAnimationFrame(::update)
+            alreadyScheduled = true
         }
     }
 
+    private fun update(tick: Double) {
+        if (messages.isNotEmpty() && model != null) {
+            val newCommands = mutableListOf<Cmd<Msg>>()
+            var currentModel = model
+            messages.forEach {
+                val (newModel, nextCmd) = program.update(it, currentModel!!)
+                newCommands.add(nextCmd)
+                currentModel = newModel
+            }
+
+            if (currentModel != model) {
+                val newView = program.view(currentModel!!)
+                this.currentNode = render(currentNode, currentVNode, newView, ::send)
+                this.model = currentModel
+                this.currentVNode = newView
+            }
+            alreadyScheduled = false
+        }
+        else {
+            updateIfNeeded()
+        }
+    }
 
     internal fun start(): Application<Model, Msg> {
         val (initialModel, cmd) = program.init()
         this.model = initialModel
         val view = program.view(model.asDynamic())
         this.currentVNode = view
-        this.currentNode = render(currentNode, view, null, ::handler)
-
-
+        this.currentNode = render(currentNode, view, null, ::send)
         return this
     }
 
