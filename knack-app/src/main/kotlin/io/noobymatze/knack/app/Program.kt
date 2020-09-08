@@ -1,5 +1,6 @@
 package io.noobymatze.knack.app
 
+import io.noobymatze.knack.effects.Cmd
 import io.noobymatze.knack.html.Html
 import org.w3c.dom.Node
 

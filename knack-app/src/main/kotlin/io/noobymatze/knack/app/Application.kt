@@ -1,5 +1,6 @@
 package io.noobymatze.knack.app
 
+import io.noobymatze.knack.effects.Cmd
 import io.noobymatze.knack.vdom.render
 import kotlinx.browser.window
 import org.w3c.dom.Node
@@ -27,6 +28,7 @@ class Application<Model, Msg> internal constructor(
     }
 
     private fun update(tick: Double) {
+        console.log(messages, model)
         if (messages.isNotEmpty() && model != null) {
             val newCommands = mutableListOf<Cmd<Msg>>()
             var currentModel = model
@@ -36,6 +38,7 @@ class Application<Model, Msg> internal constructor(
                 currentModel = newModel
             }
 
+            messages.clear()
             if (currentModel != model) {
                 val newView = program.view(currentModel!!)
                 this.currentNode = render(currentNode, currentVNode, newView, ::send)

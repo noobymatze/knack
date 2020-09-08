@@ -1,6 +1,6 @@
 package io.noobymatze.knack.http
 
-import io.noobymatze.knack.app.Cmd
+import io.noobymatze.knack.effects.Cmd
 
 data class Header(val name: String, val value: String)
 

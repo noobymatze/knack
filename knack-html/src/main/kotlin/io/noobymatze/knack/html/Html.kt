@@ -14,11 +14,8 @@ fun <Msg> text(attributes: Array<out Attribute<Msg>>, children: Array<out Html<M
 fun <Msg> text(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
     node("text", attributes, children)
 
-fun <Msg> node(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("node", attributes, children)
-
-fun <Msg> node(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("node", attributes, children)
+fun <Msg> node(tag: String, attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
+    node(tag, attributes, children)
 
 fun <Msg> map(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
     node("map", attributes, children)

@@ -13,9 +13,6 @@ repositories {
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-js")
-    implementation(project(":knack-vdom"))
-    implementation(project(":knack-html"))
-    implementation(project(":knack-effects"))
     testImplementation("org.jetbrains.kotlin:kotlin-test-js")
 }
 

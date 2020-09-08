@@ -151,7 +151,7 @@ private fun <Msg> applyAttributes(el: Element, attributes: dynamic, send: (Msg) 
 
 private fun <Msg> applyEvents(domNode: Element, events: dynamic, sendToApp: (Msg) -> Unit) {
     val node = domNode.asDynamic()
-    val allCallbacks = js("(io.noobymatze.knack.node.eventFs = io.noobymatze.knack.node.eventFs || {})")
+    val allCallbacks = js("(node.eventFs = node.eventFs || {})")
 
     forIn(events) { key ->
         val newHandler = events[key]
@@ -211,11 +211,11 @@ private inline fun forIn(value: dynamic, f: (key: dynamic) -> Unit) {
 // DIFFING & PATCHING
 
 
-private const val PATCH_REDRAW = "io.noobymatze.knack.PATCH_REDRAW"
-private const val PATCH_REDRAW_TEXT = "io.noobymatze.knack.PATCH_REDRAW_TEXT"
-private const val PATCH_REMOVE_LAST = "io.noobymatze.knack.PATCH_REMOVE_LAST"
-private const val PATCH_ADD = "io.noobymatze.knack.PATCH_ADD"
-private const val PATCH_ATTRS = "io.noobymatze.knack.PATCH_ATTRS"
+private const val PATCH_REDRAW = "PATCH_REDRAW"
+private const val PATCH_REDRAW_TEXT = "PATCH_REDRAW_TEXT"
+private const val PATCH_REMOVE_LAST = "PATCH_REMOVE_LAST"
+private const val PATCH_ADD = "PATCH_ADD"
+private const val PATCH_ATTRS = "PATCH_ATTRS"
 
 
 private fun <Msg> diff(
@@ -305,7 +305,7 @@ private fun diffAttributes(oldAttrs: dynamic, newAttrs: dynamic, category: Strin
     while (i < keys.length) {
         val key = keys[i]
         if (key == ATTRIBUTE_ATTR || key == ATTRIBUTE_EVENTS || key == ATTRIBUTE_STYLE) {
-            js("io.noobymatze.knack.diff = io.noobymatze.knack.diff || {}")
+            js("diff = diff || {}")
             val x = diffAttributes(oldAttrs[key], newAttrs[key], key)
             if (x != undefined) {
                 diff[key] = x
@@ -316,8 +316,8 @@ private fun diffAttributes(oldAttrs: dynamic, newAttrs: dynamic, category: Strin
 
         js("newAttrs = newAttrs || {}")
         if (!(js("key in newAttrs"))) {
-            js("io.noobymatze.knack.diff = io.noobymatze.knack.diff || {}")
-            js("io.noobymatze.knack.diff[key] = undefined")
+            js("diff = diff || {}")
+            js("diff[key] = undefined")
             i++
             continue
         }
@@ -330,8 +330,8 @@ private fun diffAttributes(oldAttrs: dynamic, newAttrs: dynamic, category: Strin
             continue
         }
 
-        js("io.noobymatze.knack.diff = io.noobymatze.knack.diff || {}")
-        js("io.noobymatze.knack.diff[key] = newValue")
+        js("diff = diff || {}")
+        js("diff[key] = newValue")
         i++
     }
 
@@ -339,8 +339,8 @@ private fun diffAttributes(oldAttrs: dynamic, newAttrs: dynamic, category: Strin
     var j: dynamic = 0
     while (j < newAttrs.length) {
         val curKey = newKeys[j]
-        js("io.noobymatze.knack.diff = io.noobymatze.knack.diff || {}")
-        js("io.noobymatze.knack.diff[curKey] = newAttrs[curKey]")
+        js("diff = diff || {}")
+        js("diff[curKey] = newAttrs[curKey]")
         j++
     }
 

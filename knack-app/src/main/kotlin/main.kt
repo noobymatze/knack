@@ -1,4 +1,4 @@
-import io.noobymatze.knack.app.Cmd
+import io.noobymatze.knack.effects.Cmd
 import io.noobymatze.knack.app.Program
 import io.noobymatze.knack.html.*
 import io.noobymatze.knack.html.Events.onClick
