@@ -13,7 +13,7 @@ repositories {
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-js")
-    implementation(project(":knack-app"))
+    implementation(project(":knack-effects"))
     testImplementation("org.jetbrains.kotlin:kotlin-test-js")
 }
 

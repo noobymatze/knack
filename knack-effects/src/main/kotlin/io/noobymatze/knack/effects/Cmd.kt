@@ -10,7 +10,7 @@ sealed class Cmd<out Msg> {
 
     internal class Batch<out Msg>(val commands: Array<out Cmd<Msg>>): Cmd<Msg>()
 
-    internal class Effect<out Msg>(val f: () -> Msg): Cmd<Msg>()
+    internal class Effect<out Msg>(val run: ((Msg) -> Unit) -> Unit): Cmd<Msg>()
 
     /**
      * @param f
@@ -23,7 +23,7 @@ sealed class Cmd<out Msg> {
             Batch(commands.map { it.map(f) }.toTypedArray())
 
         is Effect ->
-            Effect { f(this.f()) }
+            Effect { r -> this.run { r(f(it)) } }
     }
 
     companion object {
@@ -49,11 +49,11 @@ sealed class Cmd<out Msg> {
         /**
          * Returns a new [Cmd] representing an effect.
          *
-         * @param f a function running an effect, like sending
-         * an http request
+         * @param f a function which takes another function, which will
+         * be called when a message has been computed.
          * @return a new [Cmd]
          */
-        fun <Msg> effect(f: () -> Msg): Cmd<Msg> =
+        fun <Msg> effect(f: ((Msg) -> Unit) -> Unit): Cmd<Msg> =
             Effect(f)
 
     }

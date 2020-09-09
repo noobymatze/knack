@@ -23,8 +23,7 @@ interface Executor {
 
                 is Cmd.Effect ->
                     try {
-                        val msg = cmd.f()
-                        sendToApp(msg)
+                        cmd.run(sendToApp)
                     } catch (ex: Exception) {
                         console.log(ex)
 
