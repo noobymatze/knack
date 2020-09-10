@@ -1,27 +1,85 @@
 package io.noobymatze.knack.html
 
-import io.noobymatze.knack.vdom.Attribute
-import io.noobymatze.knack.vdom.VNode
+import io.noobymatze.knack.vdom.*
 import io.noobymatze.knack.vdom.node
-import io.noobymatze.knack.vdom.on
+import org.w3c.dom.events.Event
 
 
 typealias Html<Msg> = VNode<Msg>
 
-fun <Msg> text(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("text", attributes, children)
+/**
+ *
+ * @param key
+ * @param value
+ * @return
+ */
+fun <Msg> attribute(
+    key: String,
+    value: String
+): Attribute<Msg> =
+    io.noobymatze.knack.vdom.attribute(key, value)
 
-fun <Msg> text(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("text", attributes, children)
+/**
+ *
+ * @param key
+ * @param handler
+ * @return
+ */
+fun <Msg> on(
+    key: String,
+    handler: (Event) -> Msg
+): Attribute<Msg> =
+    io.noobymatze.knack.vdom.on(key, handler)
+
+/**
+ *
+ * @param property
+ * @param value
+ * @return
+ */
+fun <Msg> style(property: String, value: String): Attribute<Msg> =
+    io.noobymatze.knack.vdom.style(property, value)
+
+
+fun <Msg> text(content: String): Html<Msg> =
+    io.noobymatze.knack.vdom.text(content)
+
+class VIEW<Msg>(private val children: MutableList<Html<Msg>> = mutableListOf()) {
+
+    fun init(tag: String, attributes: Array<out Attribute<Msg>>, f: VIEW<Msg>.() -> Unit): Html<Msg> {
+        val x = io.noobymatze.knack.html.node(tag, attributes, VIEW<Msg>().apply(f).children.toTypedArray())
+        children.add(x)
+        return x
+    }
+
+    fun div(vararg attributes: Attribute<Msg>, f: VIEW<Msg>.() -> Unit): Html<Msg> =
+        init("div", attributes, f)
+
+    fun button(vararg attributes: Attribute<Msg>, f: VIEW<Msg>.() -> Unit): Html<Msg> =
+        init("button", attributes, f)
+
+    fun input(vararg attributes: Attribute<Msg>): Html<Msg> =
+        init("input", attributes) {}
+
+    fun a(vararg attributes: Attribute<Msg>, f: VIEW<Msg>.() -> Unit): Html<Msg> =
+        init("a", attributes, f)
+
+    infix fun <NewMsg> ((Msg) -> NewMsg).map(n: Html<NewMsg>) {
+
+    }
+
+    fun text(content: String): Html<Msg> {
+        val x = io.noobymatze.knack.vdom.text(content)
+        children.add(x)
+        return x
+    }
+
+}
+
+
 
 fun <Msg> node(tag: String, attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node(tag, attributes, children)
-
-fun <Msg> map(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("map", attributes, children)
-
-fun <Msg> map(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("map", attributes, children)
+    io.noobymatze.knack.vdom.node(tag, attributes, children)
 
 fun <Msg> h1(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
     node("h1", attributes, children)

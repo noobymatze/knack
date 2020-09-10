@@ -23,7 +23,7 @@ sealed class Cmd<out Msg> {
             Batch(commands.map { it.map(f) }.toTypedArray())
 
         is Effect ->
-            Effect { r -> this.run { r(f(it)) } }
+            Effect { r -> run { r(f(it)) } }
     }
 
     companion object {

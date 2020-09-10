@@ -3,9 +3,8 @@ import io.noobymatze.knack.app.Program
 import io.noobymatze.knack.html.*
 import io.noobymatze.knack.html.Events.onClick
 import io.noobymatze.knack.html.Events.onInput
-import io.noobymatze.knack.vdom.attribute
-import io.noobymatze.knack.vdom.style
-import io.noobymatze.knack.vdom.text
+import io.noobymatze.knack.html.attribute
+import io.noobymatze.knack.html.style
 import kotlinx.browser.document
 
 
@@ -26,20 +25,27 @@ fun init(): Pair<Model, Cmd<Msg>> =
 // VIEW
 
 
-fun view(i: Model): Html<Msg> = div(
-    arrayOf(),
-    text("${i.count}"),
-    button(arrayOf(onClick(Msg.Inc)),
-        a(arrayOf(onClick(Msg.Dec)), text("Bla")),
-        text("Klick me"),
-    ),
-    input(onInput(Msg::SetName), attribute("value", i.name)),
-    text(i.name),
+fun VIEW<Msg>.view(i: Model): Html<Msg> = div {
+
+    text("${i.count}")
+
+    button(onClick(Msg.Inc)) {
+        a(onClick(Msg.Dec)) { text("Bla") }
+        text("Klick me")
+    }
+
+    input(onInput(Msg::SetName), attribute("value", i.name))
+
+    text(i.name)
+
     if (i.name == "Test")
-        div(arrayOf(style("color", "red")), text("This is a Test"))
+        div(style("color", "red")) {
+            text("This is a Test")
+        }
     else
         text("What")
-)
+
+}
 
 
 
@@ -69,7 +75,7 @@ fun update(msg: Msg, model: Model): Pair<Model, Cmd<Msg>> = when (msg) {
 val program = Program(
     init = ::init,
     update = ::update,
-    view = ::view
+    view = VIEW<Msg>::view
 )
 
 
