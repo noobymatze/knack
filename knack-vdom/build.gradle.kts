@@ -1,5 +1,5 @@
 plugins {
-    kotlin("js") version "1.4.0"
+    kotlin("js") version "1.4.21"
 }
 
 group = "io.noobymatze"
@@ -11,26 +11,12 @@ repositories {
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-js")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-js")
+    testImplementation(kotlin("test-js"))
 }
 
 kotlin {
     js {
         browser {
-            webpackTask {
-                cssSupport.enabled = true
-            }
-
-            runTask {
-                cssSupport.enabled = true
-            }
-
-            testTask {
-                useKarma {
-                    useChromeHeadless()
-                    webpackConfig.cssSupport.enabled = true
-                }
-            }
         }
     }
 }

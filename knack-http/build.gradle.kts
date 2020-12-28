@@ -1,7 +1,6 @@
-import org.jetbrains.kotlin.ir.backend.js.compile
 
 plugins {
-    kotlin("js") version "1.4.0"
+    kotlin("js") version "1.4.21"
 }
 
 group = "io.noobymatze"
@@ -22,6 +21,5 @@ kotlin {
         browser {
 
         }
-        binaries.executable()
     }
 }

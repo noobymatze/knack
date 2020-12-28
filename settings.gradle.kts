@@ -1,7 +1,10 @@
 rootProject.name = "knack"
-include("knack-vdom")
-include("knack-html")
-include("knack-app")
-include("knack-http")
-include("knack-effects")
-include("knack-example")
+
+include(
+    "knack-vdom",
+    "knack-html",
+    "knack-app",
+    "knack-http",
+    "knack-effects",
+    "knack-example"
+)

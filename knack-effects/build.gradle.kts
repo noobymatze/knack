@@ -1,7 +1,5 @@
-import org.jetbrains.kotlin.ir.backend.js.compile
-
 plugins {
-    kotlin("js") version "1.4.0"
+    kotlin("js") version "1.4.21"
 }
 
 group = "io.noobymatze"
@@ -13,14 +11,11 @@ repositories {
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-js")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-js")
+    testImplementation(kotlin("test-js"))
 }
 
 kotlin {
     js {
-        browser {
-
-        }
-        binaries.executable()
+        browser()
     }
 }
