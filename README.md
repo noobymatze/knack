@@ -1,3 +1,5 @@
+*THIS IS AN EXPERIMENT AND WORK IN PROGRESS, DON'T EXPECT ANYTHING TO WORK AT ALL*
+
 # Knack
 
 Knack is an implementation of [The Elm Architecture (TEA)][tea] in
