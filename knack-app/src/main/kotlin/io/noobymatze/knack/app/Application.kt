@@ -42,7 +42,7 @@ class Application<Model, Msg> internal constructor(
             messages.clear()
             if (currentModel != model) {
                 val newView = program.view(VIEW(), currentModel!!)
-                this.currentNode = render(currentNode, currentVNode, newView, ::send)
+                this.currentNode = render(currentNode, newView, currentVNode, ::send)
                 this.model = currentModel
                 this.currentVNode = newView
             }

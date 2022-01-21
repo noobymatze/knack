@@ -1,5 +1,5 @@
 plugins {
-    kotlin("js") version "1.4.21"
+    kotlin("js") version "1.6.10"
 }
 
 group = "io.noobymatze"
