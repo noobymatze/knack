@@ -24,7 +24,10 @@ class Attribute<out Msg> private constructor(): Modifier<Msg>()
 class VNode<out Msg> private constructor(): Modifier<Msg>()
 
 
-abstract class Modifier<out Msg>
+/**
+ *
+ */
+abstract class Modifier<out Msg> internal constructor()
 
 
 /**
@@ -68,7 +71,7 @@ fun <Msg> style(property: String, value: String): Attribute<Msg> =
  * @param children
  * @return
  */
-fun <Msg> node(name: String, attributes: Array<out Attribute<Msg>>, children: Array<out VNode<Msg>>): VNode<Msg> {
+private fun <Msg> node(name: String, attributes: Array<out Attribute<Msg>>, children: Array<out VNode<Msg>>): VNode<Msg> {
     val organizeFacts = { attrs: Array<Attribute<Msg>> ->
         val result = js("{}")
         attrs.forEach {
@@ -93,7 +96,7 @@ fun <Msg> node(name: String, attributes: Array<out Attribute<Msg>>, children: Ar
  * @param children
  * @return
  */
-fun <Msg> node2(name: String, modifier: Array<out Modifier<Msg>?>): VNode<Msg> {
+fun <Msg> node(name: String, modifier: Array<out Modifier<Msg>?>): VNode<Msg> {
     val facts = js("{}")
     val children = js("[]")
     modifier.forEach { mod: dynamic ->

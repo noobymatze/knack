@@ -40,622 +40,303 @@ fun <Msg> on(
 fun <Msg> style(property: String, value: String): Attribute<Msg> =
     io.noobymatze.knack.vdom.style(property, value)
 
-
+/**
+ *
+ */
 fun <Msg> text(content: String): Html<Msg> =
     io.noobymatze.knack.vdom.text(content)
 
-class VIEW<Msg>(private val children: MutableList<Html<Msg>> = mutableListOf()) {
-
-    fun init(tag: String, attributes: Array<out Attribute<Msg>>, f: VIEW<Msg>.() -> Unit): Html<Msg> {
-        val x = io.noobymatze.knack.html.node(tag, attributes, VIEW<Msg>().apply(f).children.toTypedArray())
-        children.add(x)
-        return x
-    }
-
-    fun div(vararg attributes: Attribute<Msg>, f: VIEW<Msg>.() -> Unit): Html<Msg> =
-        init("div", attributes, f)
-
-    fun button(vararg attributes: Attribute<Msg>, f: VIEW<Msg>.() -> Unit): Html<Msg> =
-        init("button", attributes, f)
-
-    fun input(vararg attributes: Attribute<Msg>): Html<Msg> =
-        init("input", attributes) {}
-
-    fun a(vararg attributes: Attribute<Msg>, f: VIEW<Msg>.() -> Unit): Html<Msg> =
-        init("a", attributes, f)
-
-    infix fun <NewMsg> ((Msg) -> NewMsg).map(n: Html<NewMsg>) {
-
-    }
-
-    fun text(content: String): Html<Msg> {
-        val x = io.noobymatze.knack.vdom.text(content)
-        children.add(x)
-        return x
-    }
-
-}
-
-val foo: Html<Int> =
-    h1(
-        h1(text("Hello World")),
-    )
+/**
+ *
+ */
+fun <Msg> node(tag: String, vararg modifier: Modifier<Msg>): Html<Msg> =
+    io.noobymatze.knack.vdom.node(tag, modifier)
 
 fun <Msg> h1(vararg modifier: Modifier<Msg>): Html<Msg> =
-    node2("h1", modifier)
+    node("h1", modifier)
 
-fun <Msg> node(tag: String, attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    io.noobymatze.knack.vdom.node(tag, attributes, children)
+fun <Msg> h2(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("h2", modifier)
 
-fun <Msg> h1(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("h1", attributes, children)
+fun <Msg> h3(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("h3", modifier)
 
-fun <Msg> h1(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("h1", attributes, children)
+fun <Msg> h4(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("h4", modifier)
 
-fun <Msg> h2(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("h2", attributes, children)
+fun <Msg> h5(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("h5", modifier)
 
-fun <Msg> h2(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("h2", attributes, children)
+fun <Msg> h6(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("h6", modifier)
 
-fun <Msg> h3(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("h3", attributes, children)
+fun <Msg> div(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("div", modifier)
 
-fun <Msg> h3(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("h3", attributes, children)
+fun <Msg> p(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("p", modifier)
 
-fun <Msg> h4(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("h4", attributes, children)
+fun <Msg> hr(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("hr", modifier)
 
-fun <Msg> h4(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("h4", attributes, children)
+fun <Msg> pre(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("pre", modifier)
 
-fun <Msg> h5(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("h5", attributes, children)
+fun <Msg> blockquote(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("blockquote", modifier)
 
-fun <Msg> h5(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("h5", attributes, children)
+fun <Msg> span(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("span", modifier)
 
-fun <Msg> h6(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("h6", attributes, children)
+fun <Msg> a(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("a", modifier)
 
-fun <Msg> h6(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("h6", attributes, children)
+fun <Msg> code(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("code", modifier)
 
-fun <Msg> div(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("div", attributes, children)
+fun <Msg> em(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("em", modifier)
 
-fun <Msg> div(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("div", attributes, children)
+fun <Msg> strong(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("strong", modifier)
 
-fun <Msg> p(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("p", attributes, children)
+fun <Msg> i(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("i", modifier)
 
-fun <Msg> p(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("p", attributes, children)
+fun <Msg> b(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("b", modifier)
 
-fun <Msg> hr(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("hr", attributes, children)
+fun <Msg> u(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("u", modifier)
 
-fun <Msg> hr(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("hr", attributes, children)
+fun <Msg> sub(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("sub", modifier)
 
-fun <Msg> pre(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("pre", attributes, children)
+fun <Msg> sup(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("sup", modifier)
 
-fun <Msg> pre(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("pre", attributes, children)
+fun <Msg> br(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("br", modifier)
 
-fun <Msg> blockquote(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("blockquote", attributes, children)
+fun <Msg> ol(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("ol", modifier)
 
-fun <Msg> blockquote(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("blockquote", attributes, children)
+fun <Msg> ul(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("ul", modifier)
 
-fun <Msg> span(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("span", attributes, children)
+fun <Msg> li(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("li", modifier)
 
-fun <Msg> span(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("span", attributes, children)
+fun <Msg> dl(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("dl", modifier)
 
-fun <Msg> a(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("a", attributes, children)
+fun <Msg> dt(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("dt", modifier)
 
-fun <Msg> a(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("a", attributes, children)
+fun <Msg> dd(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("dd", modifier)
 
-fun <Msg> code(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("code", attributes, children)
+fun <Msg> img(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("img", modifier)
 
-fun <Msg> code(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("code", attributes, children)
+fun <Msg> iframe(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("iframe", modifier)
 
-fun <Msg> em(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("em", attributes, children)
+fun <Msg> canvas(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("canvas", modifier)
 
-fun <Msg> em(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("em", attributes, children)
+fun <Msg> math(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("math", modifier)
 
-fun <Msg> strong(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("strong", attributes, children)
-
-fun <Msg> strong(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("strong", attributes, children)
-
-fun <Msg> i(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("i", attributes, children)
-
-fun <Msg> i(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("i", attributes, children)
-
-fun <Msg> b(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("b", attributes, children)
-
-fun <Msg> b(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("b", attributes, children)
-
-fun <Msg> u(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("u", attributes, children)
-
-fun <Msg> u(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("u", attributes, children)
-
-fun <Msg> sub(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("sub", attributes, children)
-
-fun <Msg> sub(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("sub", attributes, children)
-
-fun <Msg> sup(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("sup", attributes, children)
-
-fun <Msg> sup(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("sup", attributes, children)
-
-fun <Msg> br(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("br", attributes, children)
-
-fun <Msg> br(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("br", attributes, children)
-
-fun <Msg> ol(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("ol", attributes, children)
-
-fun <Msg> ol(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("ol", attributes, children)
-
-fun <Msg> ul(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("ul", attributes, children)
-
-fun <Msg> ul(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("ul", attributes, children)
-
-fun <Msg> li(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("li", attributes, children)
-
-fun <Msg> li(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("li", attributes, children)
-
-fun <Msg> dl(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("dl", attributes, children)
-
-fun <Msg> dl(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("dl", attributes, children)
-
-fun <Msg> dt(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("dt", attributes, children)
-
-fun <Msg> dt(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("dt", attributes, children)
-
-fun <Msg> dd(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("dd", attributes, children)
-
-fun <Msg> dd(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("dd", attributes, children)
-
-fun <Msg> img(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("img", attributes, children)
-
-fun <Msg> img(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("img", attributes, children)
-
-fun <Msg> iframe(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("iframe", attributes, children)
-
-fun <Msg> iframe(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("iframe", attributes, children)
-
-fun <Msg> canvas(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("canvas", attributes, children)
-
-fun <Msg> canvas(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("canvas", attributes, children)
-
-fun <Msg> math(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("math", attributes, children)
-
-fun <Msg> math(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("math", attributes, children)
-
-fun <Msg> form(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("form", attributes, children)
-
-fun <Msg> form(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("form", attributes, children)
+fun <Msg> form(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("form", modifier)
 
 fun <Msg> input(vararg attributes: Attribute<Msg>): Html<Msg> =
     node("input", attributes, arrayOf())
 
-fun <Msg> textarea(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("textarea", attributes, children)
+fun <Msg> textarea(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("textarea", modifier)
 
-fun <Msg> textarea(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("textarea", attributes, children)
+fun <Msg> button(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("button", modifier)
 
-fun <Msg> button(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("button", attributes, children)
+fun <Msg> select(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("select", modifier)
 
-fun <Msg> button(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("button", attributes, children)
+fun <Msg> option(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("option", modifier)
 
-fun <Msg> select(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("select", attributes, children)
+fun <Msg> section(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("section", modifier)
 
-fun <Msg> select(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("select", attributes, children)
+fun <Msg> nav(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("nav", modifier)
 
-fun <Msg> option(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("option", attributes, children)
+fun <Msg> article(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("article", modifier)
 
-fun <Msg> option(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("option", attributes, children)
+fun <Msg> aside(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("aside", modifier)
 
-fun <Msg> section(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("section", attributes, children)
+fun <Msg> header(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("header", modifier)
 
-fun <Msg> section(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("section", attributes, children)
+fun <Msg> footer(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("footer", modifier)
 
-fun <Msg> nav(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("nav", attributes, children)
+fun <Msg> address(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("address", modifier)
 
-fun <Msg> nav(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("nav", attributes, children)
+fun <Msg> main_(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("main_", modifier)
 
-fun <Msg> article(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("article", attributes, children)
+fun <Msg> figure(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("figure", modifier)
 
-fun <Msg> article(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("article", attributes, children)
+fun <Msg> figcaption(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("figcaption", modifier)
 
-fun <Msg> aside(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("aside", attributes, children)
+fun <Msg> table(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("table", modifier)
 
-fun <Msg> aside(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("aside", attributes, children)
+fun <Msg> caption(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("caption", modifier)
 
-fun <Msg> header(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("header", attributes, children)
+fun <Msg> colgroup(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("colgroup", modifier)
 
-fun <Msg> header(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("header", attributes, children)
+fun <Msg> col(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("col", modifier)
 
-fun <Msg> footer(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("footer", attributes, children)
+fun <Msg> tbody(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("tbody", modifier)
 
-fun <Msg> footer(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("footer", attributes, children)
+fun <Msg> thead(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("thead", modifier)
 
-fun <Msg> address(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("address", attributes, children)
+fun <Msg> tfoot(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("tfoot", modifier)
 
-fun <Msg> address(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("address", attributes, children)
+fun <Msg> tr(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("tr", modifier)
 
-fun <Msg> main_(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("main_", attributes, children)
+fun <Msg> td(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("td", modifier)
 
-fun <Msg> main_(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("main_", attributes, children)
+fun <Msg> th(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("th", modifier)
 
-fun <Msg> figure(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("figure", attributes, children)
+fun <Msg> fieldset(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("fieldset", modifier)
 
-fun <Msg> figure(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("figure", attributes, children)
+fun <Msg> legend(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("legend", modifier)
 
-fun <Msg> figcaption(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("figcaption", attributes, children)
+fun <Msg> label(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("label", modifier)
 
-fun <Msg> figcaption(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("figcaption", attributes, children)
+fun <Msg> datalist(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("datalist", modifier)
 
-fun <Msg> table(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("table", attributes, children)
+fun <Msg> optgroup(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("optgroup", modifier)
 
-fun <Msg> table(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("table", attributes, children)
+fun <Msg> output(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("output", modifier)
 
-fun <Msg> caption(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("caption", attributes, children)
+fun <Msg> progress(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("progress", modifier)
 
-fun <Msg> caption(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("caption", attributes, children)
+fun <Msg> meter(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("meter", modifier)
 
-fun <Msg> colgroup(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("colgroup", attributes, children)
+fun <Msg> audio(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("audio", modifier)
 
-fun <Msg> colgroup(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("colgroup", attributes, children)
+fun <Msg> video(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("video", modifier)
 
-fun <Msg> col(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("col", attributes, children)
+fun <Msg> source(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("source", modifier)
 
-fun <Msg> col(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("col", attributes, children)
+fun <Msg> track(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("track", modifier)
 
-fun <Msg> tbody(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("tbody", attributes, children)
+fun <Msg> embed(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("embed", modifier)
 
-fun <Msg> tbody(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("tbody", attributes, children)
+fun <Msg> `object`(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("object", modifier)
 
-fun <Msg> thead(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("thead", attributes, children)
+fun <Msg> param(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("param", modifier)
 
-fun <Msg> thead(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("thead", attributes, children)
+fun <Msg> ins(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("ins", modifier)
 
-fun <Msg> tfoot(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("tfoot", attributes, children)
+fun <Msg> del(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("del", modifier)
 
-fun <Msg> tfoot(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("tfoot", attributes, children)
+fun <Msg> small(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("small", modifier)
 
-fun <Msg> tr(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("tr", attributes, children)
+fun <Msg> cite(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("cite", modifier)
 
-fun <Msg> tr(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("tr", attributes, children)
+fun <Msg> dfn(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("dfn", modifier)
 
-fun <Msg> td(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("td", attributes, children)
+fun <Msg> abbr(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("abbr", modifier)
 
-fun <Msg> td(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("td", attributes, children)
+fun <Msg> time(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("time", modifier)
 
-fun <Msg> th(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("th", attributes, children)
+fun <Msg> `var`(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("var", modifier)
 
-fun <Msg> th(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("th", attributes, children)
+fun <Msg> samp(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("samp", modifier)
 
-fun <Msg> fieldset(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("fieldset", attributes, children)
+fun <Msg> kbd(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("kbd", modifier)
 
-fun <Msg> fieldset(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("fieldset", attributes, children)
+fun <Msg> s(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("s", modifier)
 
-fun <Msg> legend(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("legend", attributes, children)
+fun <Msg> q(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("q", modifier)
 
-fun <Msg> legend(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("legend", attributes, children)
+fun <Msg> mark(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("mark", modifier)
 
-fun <Msg> label(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("label", attributes, children)
+fun <Msg> ruby(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("ruby", modifier)
 
-fun <Msg> label(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("label", attributes, children)
+fun <Msg> rt(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("rt", modifier)
 
-fun <Msg> datalist(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("datalist", attributes, children)
+fun <Msg> rp(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("rp", modifier)
 
-fun <Msg> datalist(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("datalist", attributes, children)
+fun <Msg> bdi(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("bdi", modifier)
 
-fun <Msg> optgroup(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("optgroup", attributes, children)
+fun <Msg> bdo(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("bdo", modifier)
 
-fun <Msg> optgroup(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("optgroup", attributes, children)
+fun <Msg> wbr(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("wbr", modifier)
 
-fun <Msg> output(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("output", attributes, children)
+fun <Msg> details(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("details", modifier)
 
-fun <Msg> output(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("output", attributes, children)
+fun <Msg> summary(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("summary", modifier)
 
-fun <Msg> progress(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("progress", attributes, children)
+fun <Msg> menuitem(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("menuitem", modifier)
 
-fun <Msg> progress(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("progress", attributes, children)
+fun <Msg> menu(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node("menu", modifier)
 
-fun <Msg> meter(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("meter", attributes, children)
-
-fun <Msg> meter(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("meter", attributes, children)
-
-fun <Msg> audio(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("audio", attributes, children)
-
-fun <Msg> audio(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("audio", attributes, children)
-
-fun <Msg> video(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("video", attributes, children)
-
-fun <Msg> video(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("video", attributes, children)
-
-fun <Msg> source(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("source", attributes, children)
-
-fun <Msg> source(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("source", attributes, children)
-
-fun <Msg> track(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("track", attributes, children)
-
-fun <Msg> track(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("track", attributes, children)
-
-fun <Msg> embed(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("embed", attributes, children)
-
-fun <Msg> embed(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("embed", attributes, children)
-
-fun <Msg> `object`(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("object", attributes, children)
-
-fun <Msg> `object`(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("object", attributes, children)
-
-fun <Msg> param(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("param", attributes, children)
-
-fun <Msg> param(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("param", attributes, children)
-
-fun <Msg> ins(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("ins", attributes, children)
-
-fun <Msg> ins(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("ins", attributes, children)
-
-fun <Msg> del(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("del", attributes, children)
-
-fun <Msg> del(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("del", attributes, children)
-
-fun <Msg> small(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("small", attributes, children)
-
-fun <Msg> small(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("small", attributes, children)
-
-fun <Msg> cite(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("cite", attributes, children)
-
-fun <Msg> cite(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("cite", attributes, children)
-
-fun <Msg> dfn(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("dfn", attributes, children)
-
-fun <Msg> dfn(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("dfn", attributes, children)
-
-fun <Msg> abbr(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("abbr", attributes, children)
-
-fun <Msg> abbr(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("abbr", attributes, children)
-
-fun <Msg> time(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("time", attributes, children)
-
-fun <Msg> time(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("time", attributes, children)
-
-fun <Msg> `var`(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("var", attributes, children)
-
-fun <Msg> `var`(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("var", attributes, children)
-
-fun <Msg> samp(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("samp", attributes, children)
-
-fun <Msg> samp(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("samp", attributes, children)
-
-fun <Msg> kbd(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("kbd", attributes, children)
-
-fun <Msg> kbd(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("kbd", attributes, children)
-
-fun <Msg> s(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("s", attributes, children)
-
-fun <Msg> s(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("s", attributes, children)
-
-fun <Msg> q(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("q", attributes, children)
-
-fun <Msg> q(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("q", attributes, children)
-
-fun <Msg> mark(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("mark", attributes, children)
-
-fun <Msg> mark(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("mark", attributes, children)
-
-fun <Msg> ruby(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("ruby", attributes, children)
-
-fun <Msg> ruby(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("ruby", attributes, children)
-
-fun <Msg> rt(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("rt", attributes, children)
-
-fun <Msg> rt(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("rt", attributes, children)
-
-fun <Msg> rp(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("rp", attributes, children)
-
-fun <Msg> rp(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("rp", attributes, children)
-
-fun <Msg> bdi(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("bdi", attributes, children)
-
-fun <Msg> bdi(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("bdi", attributes, children)
-
-fun <Msg> bdo(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("bdo", attributes, children)
-
-fun <Msg> bdo(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("bdo", attributes, children)
-
-fun <Msg> wbr(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("wbr", attributes, children)
-
-fun <Msg> wbr(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("wbr", attributes, children)
-
-fun <Msg> details(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("details", attributes, children)
-
-fun <Msg> details(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("details", attributes, children)
-
-fun <Msg> summary(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("summary", attributes, children)
-
-fun <Msg> summary(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("summary", attributes, children)
-
-fun <Msg> menuitem(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("menuitem", attributes, children)
-
-fun <Msg> menuitem(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("menuitem", attributes, children)
-
-fun <Msg> menu(attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
-    node("menu", attributes, children)
-
-fun <Msg> menu(attributes: Array<out Attribute<Msg>>, vararg children: Html<Msg>): Html<Msg> =
-    node("menu", attributes, children)

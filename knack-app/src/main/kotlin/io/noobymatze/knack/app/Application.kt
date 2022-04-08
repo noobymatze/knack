@@ -1,7 +1,6 @@
 package io.noobymatze.knack.app
 
 import io.noobymatze.knack.effects.Cmd
-import io.noobymatze.knack.html.VIEW
 import io.noobymatze.knack.vdom.render
 import kotlinx.browser.window
 import org.w3c.dom.Node
@@ -41,7 +40,7 @@ class Application<Model, Msg> internal constructor(
 
             messages.clear()
             if (currentModel != model) {
-                val newView = program.view(VIEW(), currentModel!!)
+                val newView = program.view(currentModel!!)
                 this.currentNode = render(currentNode, newView, currentVNode, ::send)
                 this.model = currentModel
                 this.currentVNode = newView
@@ -56,7 +55,7 @@ class Application<Model, Msg> internal constructor(
     internal fun start(): Application<Model, Msg> {
         val (initialModel, cmd) = program.init()
         this.model = initialModel
-        val view = program.view(VIEW(), model.asDynamic())
+        val view = program.view(model.asDynamic())
         this.currentVNode = view
         this.currentNode = render(currentNode, view, null, ::send)
         return this

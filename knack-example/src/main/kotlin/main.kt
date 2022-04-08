@@ -25,27 +25,20 @@ fun init(): Pair<Model, Cmd<Msg>> =
 // VIEW
 
 
-fun VIEW<Msg>.view(i: Model): Html<Msg> = div {
-
-    text("${i.count}")
-
-    button(onClick(Msg.Inc)) {
-        a(onClick(Msg.Dec)) { text("Bla") }
-        text("Klick me")
-    }
-
-    input(onInput(Msg::SetName), attribute("value", i.name))
-
-    text(i.name)
-
-    if (i.name == "Test")
-        div(style("color", "red")) {
-            text("This is a Test")
-        }
-    else
-        text("What")
-
-}
+fun view(i: Model): Html<Msg> =
+    div(
+        text("${i.count}"),
+        button(
+            onClick(Msg.Inc),
+            a(onClick(Msg.Dec), text("Bla")),
+        ),
+        input(onInput(Msg::SetName), attribute("value", i.name)),
+        text(i.name),
+        if (i.name == "Test")
+            div(style("color", "red"), text("This is a test"))
+        else
+            text("What")
+    )
 
 
 
@@ -75,7 +68,7 @@ fun update(msg: Msg, model: Model): Pair<Model, Cmd<Msg>> = when (msg) {
 val program = Program(
     init = ::init,
     update = ::update,
-    view = VIEW<Msg>::view
+    view = ::view
 )
 
 

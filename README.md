@@ -38,27 +38,20 @@ fun init() =
 // VIEW
 
 
-fun view(model: Model): Html<Msg> = div {
-    div {
-        text("${model.counter}")
-    }
-
-    button(onClick(Msg.Inc)) {
-        text("Increment")
-    }
-    
-    button(onClick(Msg.Dec)) {
-        text("Decrement")
-    }
-}
+fun view(model: Model): Html<Msg> = 
+    div(
+        text("${model.counter}"),
+        button(onClick(Msg.Inc), text("Increment")),
+        button(onClick(Msg.Dec), text("Decrement")),
+    )
 
 
 // UPDATE
 
 
-sealed class Msg {
-    object Inc: Msg()
-    object Dec: Msg()
+sealed interface Msg {
+    object Inc: Msg
+    object Dec: Msg
 }
 
 
