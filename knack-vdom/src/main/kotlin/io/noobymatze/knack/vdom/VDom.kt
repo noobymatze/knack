@@ -16,12 +16,15 @@ private const val ATTRIBUTE_ATTR = "ATTR"
 /**
  *
  */
-class Attribute<out Msg> private constructor()
+class Attribute<out Msg> private constructor(): Modifier<Msg>()
 
 /**
  *
  */
-class VNode<out Msg> private constructor()
+class VNode<out Msg> private constructor(): Modifier<Msg>()
+
+
+abstract class Modifier<out Msg>
 
 
 /**
@@ -81,6 +84,35 @@ fun <Msg> node(name: String, attributes: Array<out Attribute<Msg>>, children: Ar
     }
 
     return js("""{$: 'NODE', name: name, attributes: organizeFacts(attributes), children: children}""")
+}
+
+/**
+ *
+ * @param name
+ * @param attributes
+ * @param children
+ * @return
+ */
+fun <Msg> node2(name: String, modifier: Array<out Modifier<Msg>?>): VNode<Msg> {
+    val facts = js("{}")
+    val children = js("[]")
+    modifier.forEach { mod: dynamic ->
+        if (mod != null) {
+            val tag = mod["$"]
+            if (tag == "NODE" || tag == "TEXT") {
+                children.push(mod)
+            }
+            else {
+                if (facts[tag] == undefined)
+                    facts[tag] = js("{}")
+
+                val r = facts[tag]
+                r[mod.key] = mod.value
+            }
+        }
+    }
+
+    return js("""{$: 'NODE', name: name, attributes: facts, children: children}""")
 }
 
 /**

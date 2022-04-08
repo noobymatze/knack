@@ -76,7 +76,13 @@ class VIEW<Msg>(private val children: MutableList<Html<Msg>> = mutableListOf()) 
 
 }
 
+val foo: Html<Int> =
+    h1(
+        h1(text("Hello World")),
+    )
 
+fun <Msg> h1(vararg modifier: Modifier<Msg>): Html<Msg> =
+    node2("h1", modifier)
 
 fun <Msg> node(tag: String, attributes: Array<out Attribute<Msg>>, children: Array<out Html<Msg>>): Html<Msg> =
     io.noobymatze.knack.vdom.node(tag, attributes, children)
