@@ -3,75 +3,162 @@ package io.noobymatze.knack.http
 import io.noobymatze.knack.effects.Cmd
 import org.w3c.xhr.XMLHttpRequest
 
-data class Header(val name: String, val value: String)
+/**
+ *
+ * @param name
+ * @param value
+ */
+data class Header(
+    val name: String,
+    val value: String
+)
+
+/**
+ *
+ * @param method
+ * @param url
+ * @param headers
+ * @param body
+ * @param expect
+ */
+data class Request<out A>(
+    val method: String,
+    val url: String,
+    val headers: List<Header> = emptyList(),
+    val body: Body = Body.None,
+    val expect: Expect<A>,
+    val timeout: Double,
+)
 
 /**
  *
  */
-data class Request<out Msg>(
-    val method: String,
-    val url: String,
-    val headers: List<Header>,
-    val body: Body,
-    val expect: Expect<Msg>
-)
+sealed interface Expect<out A> {
 
-sealed class Expect<out Msg> {
+    /**
+     *
+     */
+    class Json<out A>: Expect<A>
+
+    /**
+     *
+     */
+    object Empty: Expect<Nothing>
+
+    /**
+     *
+     */
+    object Text: Expect<String>
+
 }
 
 
-sealed class Body {
+/**
+ *
+ */
+sealed interface Body {
+
+    /**
+     *
+     */
+    object None: Body
+
+    /**
+     *
+     */
+    data class Json<out A>(val value: A): Body
+
 }
 
 
+/**
+ *
+ */
 sealed class Response<out Body> {
-    data class BadUrl(val url: String): Response<Nothing>()
-    object Timeout: Response<Nothing>()
-    object NetworkError: Response<Nothing>()
-    data class BadStatus<out Body>(
-        val meta: Metadata,
-        val body: Body
-    ): Response<Body>()
 
+    /**
+     *
+     */
+    data class BadUrl(val url: String): Response<Nothing>()
+
+    /**
+     *
+     */
+    object Timeout: Response<Nothing>()
+
+    /**
+     *
+     */
+    object NetworkError: Response<Nothing>()
+
+    /**
+     *
+     */
+    data class BadStatus<out A>(
+        val meta: Metadata,
+        val body: String,
+    ): Response<A>()
+
+    /**
+     *
+     */
     data class GoodStatus<out Body>(
         val meta: Metadata,
         val body: Body
     ): Response<Body>()
 }
 
+/**
+ *
+ * @param url
+ * @param statusCode
+ * @param statusText
+ * @param headers
+ */
 data class Metadata(
     val url: String,
     val statusCode: Int,
     val statusText: String,
-    val headers: Map<String, String>
+    val headers: Map<String, String>,
 )
 
 
-fun <Msg> Request<Msg>.execute(handle: (Response<String>) -> Msg): Cmd<Msg> = Cmd.effect { callback ->
+fun <A, Msg> Request<A>.execute(handle: (Response<A>) -> Msg): Cmd<Msg> = Cmd.effect { callback ->
     val xhr = XMLHttpRequest()
     xhr.open(method, url)
     headers.forEach {
         xhr.setRequestHeader(it.name, it.value)
     }
+
     xhr.addEventListener("success", { event ->
         val statusCode = xhr.status
         val meta = Metadata(
             url = url,
             statusCode = statusCode.toInt(),
             statusText = xhr.statusText,
-            headers = mapOf()
+            headers = emptyMap(),
         )
 
         if (200 <= statusCode && statusCode < 400) {
             val response = Response.GoodStatus(
-                body = xhr.responseText,
+                body = when (expect) {
+                    is Expect.Json ->
+                        JSON.parse<A>(xhr.responseText)
+
+                    is Expect.Empty ->
+                        null as A
+
+                    is Expect.Text ->
+                        xhr.responseText as A
+
+                },
                 meta = meta
             )
 
             callback(handle(response))
         }
         else {
-            val response = Response.BadStatus(
+            val response = Response.BadStatus<A>(
                 body = xhr.responseText,
                 meta = meta
             )
@@ -81,8 +168,14 @@ fun <Msg> Request<Msg>.execute(handle: (Response<String>) -> Msg): Cmd<Msg> = Cm
     })
 
     xhr.addEventListener("error", { event ->
-
+        callback(handle(Response.NetworkError))
     })
 
-    xhr.send()
+    xhr.send(when (body) {
+        is Body.None ->
+            undefined
+
+        is Body.Json<*> ->
+            JSON.stringify(body.value)
+    })
 }

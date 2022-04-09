@@ -151,8 +151,8 @@ fun <Msg> math(vararg modifier: Modifier<Msg>): Html<Msg> =
 fun <Msg> form(vararg modifier: Modifier<Msg>): Html<Msg> =
     node("form", modifier)
 
-fun <Msg> input(vararg attributes: Attribute<Msg>): Html<Msg> =
-    node("input", attributes, arrayOf())
+fun <Msg> input(vararg attributes: Modifier<Msg>): Html<Msg> =
+    node("input", attributes)
 
 fun <Msg> textarea(vararg modifier: Modifier<Msg>): Html<Msg> =
     node("textarea", modifier)
